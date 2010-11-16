@@ -2,5 +2,4 @@ improved text analysis features.
 stats tracking.
 perhaps use a customized version of vim - vimscript
 	use vim -S 750words.vim <file>
-persistent configuration
 
