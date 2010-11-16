@@ -1,6 +1,6 @@
-command line 750words clone
-	improved text analysis features.
-	stats tracking.
-	perhaps use a customized version of vim - vimscript
-		use vim -S 750words.vim <file>
+improved text analysis features.
+stats tracking.
+perhaps use a customized version of vim - vimscript
+	use vim -S 750words.vim <file>
+persistent configuration
 

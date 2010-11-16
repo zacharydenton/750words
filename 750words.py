@@ -100,7 +100,7 @@ def main():
     elif args.action == 'cat':
         sys.stdout.write(cat(date))
     elif args.action == 'stats':
-        print stats(date)
+        sys.stdout.write(stats(date))
     elif args.action == 'wc':
         print wc(date)
 
