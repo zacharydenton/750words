@@ -66,6 +66,12 @@ class SevenFiftyWords:
             sys.stdout.write(open(path, 'r').read())
     
     def config(self, args):
+        if args.editor:
+            self.configuration.set('Editor', 'command', args.editor)
+            with open(self.configfile, 'wb') as cfile:
+                self.configuration.write(cfile)
+                cfile.close()
+
         for section in self.configuration.sections():
             print section + ":"
             print self.configuration.items(section)
