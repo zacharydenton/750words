@@ -54,10 +54,11 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('action', nargs='?', default='edit', choices=actions)
+    parser.add_argument('--editor', help="The editor you wish to use to write your words.", default='vim')
     args = parser.parse_args()
 
     if args.action == 'edit':
-        write_today('vim')
+        write_today(args.editor)
     elif args.action == 'cat':
         cat_today()
     elif args.action == 'stats':
