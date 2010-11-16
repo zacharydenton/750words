@@ -1,3 +1,4 @@
+" word count functions
 function WordCount()
 	let s:old_status = v:statusmsg
 	exe "silent normal g\<c-g>"
@@ -6,4 +7,8 @@ function WordCount()
 	return s:word_count
 endfunction
 
-echo WordCount()
+set statusline=wc:%{WordCount()}
+
+" word wrap options
+set wrap
+set linebreak
