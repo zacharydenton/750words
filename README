@@ -1,9 +1,13 @@
-usage: 750words.py [-h] [--editor EDITOR] {cat,edit,stats,wc} [date]
+usage: 750words.py [-h] {stats,edit,cat,path,config,wc} ...
 
 positional arguments:
-  {cat,edit,stats,wc}  the action you wish to perform
-  date                 the day on which to perform the action
+  {stats,edit,cat,path,config,wc}
+    cat                 cat the text
+    config              modify or view configuration
+    edit                edit the text
+    path                get the path to the text file
+    stats               view stats
+    wc                  view word count
 
 optional arguments:
-  -h, --help           show this help message and exit
-  --editor EDITOR      the text editor you wish to use
+  -h, --help            show this help message and exit

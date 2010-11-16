@@ -148,17 +148,17 @@ class SevenFiftyWords:
         edit_parser.set_defaults(func=self.edit)
     
         # path parser
-        path_parser = subparsers.add_parser('path', help='path the text')
+        path_parser = subparsers.add_parser('path', help='get the path to the text file')
         path_parser.add_argument('date', help="the date of the text", default=parse_date("today"), type=parse_date, nargs='?')
         path_parser.set_defaults(func=self.path)
     
         # stats parser
-        stats_parser = subparsers.add_parser('stats', help='stats the text')
+        stats_parser = subparsers.add_parser('stats', help='view stats')
         stats_parser.add_argument('date', help="the date of the text", default=parse_date("today"), type=parse_date, nargs='?')
         stats_parser.set_defaults(func=self.stats)
     
         # wc parser
-        wc_parser = subparsers.add_parser('wc', help='wc the text')
+        wc_parser = subparsers.add_parser('wc', help='view word count')
         wc_parser.add_argument('date', help="the date of the text", default=parse_date("today"), type=parse_date, nargs='?')
         wc_parser.set_defaults(func=self.wc)
     
