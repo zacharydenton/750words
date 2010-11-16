@@ -10,10 +10,7 @@ import datetime
 import ConfigParser
 
 def cat(date):
-    out_dir = os.path.expanduser('~/.750words/')
-    file_format = "txt"
-    today = datetime.datetime.today()
-    path = os.path.join(out_dir, "%04i-%02i-%02i" % (today.year, today.month, today.day) + '.' + file_format) 
+    path = get_path(date)
     if not os.path.exists(path):
         sys.stdout.write('')
     else:
@@ -29,10 +26,7 @@ def edit(date, editor):
     Returns the path to today's writing if it contains at least 750 words; False if not.
     """ 
     
-    temp_dir = tempfile.mkdtemp()
-    out_dir = os.path.expanduser('~/.750words/')
-    file_format = "txt"
-    path = os.path.join(out_dir, "%04i-%02i-%02i" % (date.year, date.month, date.day) + '.' + file_format) 
+    path = get_path(date)
     if not os.path.exists(path):
         try:
             os.mkdir(os.path.dirname(path))
@@ -41,7 +35,7 @@ def edit(date, editor):
         open(path, 'w').close() # touch the file
     create_time = os.stat(path).st_mtime
     subprocess.call([editor, path])
-    word_count = int(subprocess.Popen('wc -w < ' + path, shell=True, stdout=subprocess.PIPE).communicate()[0])
+    word_count = wc(date)
     print 'You have written %i out of 750 words so far.' % word_count
     if word_count < 750:
         return False
@@ -52,9 +46,20 @@ def stats(date):
     pass
 
 def wc(date):
-    pass
+    try:
+        path = get_path(date)
+        word_count = int(subprocess.Popen('wc -w < ' + path, shell=True, stdout=subprocess.PIPE).communicate()[0])
+    except:
+        word_count = 0
+    return word_count
 
-def isnumber(string):
+def get_path(date):
+        out_dir = os.path.expanduser('~/.750words/')
+        file_format = "txt"
+        path = os.path.join(out_dir, "%04i-%02i-%02i" % (date.year, date.month, date.day) + '.' + file_format) 
+        return path
+
+def is_number(string):
     try:
         float(string)
         return True
@@ -63,7 +68,7 @@ def isnumber(string):
 
 def parse_date(date):
     '''parses a natural language date'''
-    if isnumber(date):
+    if is_number(date):
         date = int(date)
         return datetime.datetime.today() + (datetime.timedelta(days=1) * date)
 
@@ -91,6 +96,8 @@ def main():
         cat(date)
     elif args.action == 'stats':
         stats(date)
+    elif args.action == 'wc':
+        print wc(date)
 
 if __name__ == "__main__":
     main()
