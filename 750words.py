@@ -46,7 +46,7 @@ def stats(date):
     try:
         path = get_path(date)
         style = subprocess.Popen(['style', path], stdout=subprocess.PIPE).communicate()[0]
-    except:
+    except OSError:
         style = "You must install the 'style' program. Try sudo apt-get install diction."
     return style
 
@@ -54,7 +54,7 @@ def wc(date):
     try:
         path = get_path(date)
         word_count = int(subprocess.Popen('wc -w < ' + path, shell=True, stdout=subprocess.PIPE).communicate()[0])
-    except:
+    except OSError:
         word_count = 0
     return word_count
 
@@ -85,7 +85,7 @@ def parse_date(date):
     return datetime.datetime.today()
 
 def main():
-    actions = ('cat', 'edit', 'stats', 'wc')
+    actions = ('cat', 'edit', 'path', 'stats', 'wc')
 
     parser = argparse.ArgumentParser()
     parser.add_argument('action', choices=actions, help="the action you wish to perform")
@@ -95,10 +95,12 @@ def main():
 
     date = parse_date(args.date)
 
-    if args.action == 'edit':
-        edit(date, args.editor)
-    elif args.action == 'cat':
+    if args.action == 'cat':
         sys.stdout.write(cat(date))
+    elif args.action == 'edit':
+        edit(date, args.editor)
+    elif args.action == 'path':
+        print get_path(date)
     elif args.action == 'stats':
         sys.stdout.write(stats(date))
     elif args.action == 'wc':
