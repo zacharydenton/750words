@@ -1,0 +1,9 @@
+usage: 750words.py [-h] [--editor EDITOR] {cat,edit,stats,wc} [date]
+
+positional arguments:
+  {cat,edit,stats,wc}  the action you wish to perform
+  date                 the day on which to perform the action
+
+optional arguments:
+  -h, --help           show this help message and exit
+  --editor EDITOR      the text editor you wish to use
