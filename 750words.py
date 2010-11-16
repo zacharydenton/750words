@@ -12,9 +12,9 @@ import ConfigParser
 def cat(date):
     path = get_path(date)
     if not os.path.exists(path):
-        sys.stdout.write('')
+        return ''
     else:
-        sys.stdout.write(open(path, 'r').read())
+        return open(path, 'r').read()
 
 def edit(date, editor):
     """Opens up an editor so that you can write the day's words.
@@ -43,7 +43,12 @@ def edit(date, editor):
         return path
 
 def stats(date):
-    pass
+    try:
+        path = get_path(date)
+        style = subprocess.Popen(['style', path], stdout=subprocess.PIPE).communicate()[0]
+    except:
+        style = "You must install the 'style' program. Try sudo apt-get install diction."
+    return style
 
 def wc(date):
     try:
@@ -93,9 +98,9 @@ def main():
     if args.action == 'edit':
         edit(date, args.editor)
     elif args.action == 'cat':
-        cat(date)
+        sys.stdout.write(cat(date))
     elif args.action == 'stats':
-        stats(date)
+        print stats(date)
     elif args.action == 'wc':
         print wc(date)
 
