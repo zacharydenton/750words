@@ -9,7 +9,17 @@ import argparse
 import datetime
 import ConfigParser
 
-def write_today(editor):
+def cat(date):
+    out_dir = os.path.expanduser('~/.750words/')
+    file_format = "txt"
+    today = datetime.datetime.today()
+    path = os.path.join(out_dir, "%04i-%02i-%02i" % (today.year, today.month, today.day) + '.' + file_format) 
+    if not os.path.exists(path):
+        sys.stdout.write('')
+    else:
+        sys.stdout.write(open(path, 'r').read())
+
+def edit(date, editor):
     """Opens up an editor so that you can write the day's words.
     
     Keyword arguments:
@@ -22,10 +32,12 @@ def write_today(editor):
     temp_dir = tempfile.mkdtemp()
     out_dir = os.path.expanduser('~/.750words/')
     file_format = "txt"
-    today = datetime.datetime.today()
-    path = os.path.join(out_dir, "%4i-%2i-%2i" % (today.year, today.month, today.day) + '.' + file_format) 
+    path = os.path.join(out_dir, "%04i-%02i-%02i" % (date.year, date.month, date.day) + '.' + file_format) 
     if not os.path.exists(path):
-        os.mkdir(os.path.dirname(path))
+        try:
+            os.mkdir(os.path.dirname(path))
+        except OSError:
+            pass
         open(path, 'w').close() # touch the file
     create_time = os.stat(path).st_mtime
     subprocess.call([editor, path])
@@ -36,33 +48,49 @@ def write_today(editor):
     else:
         return path
 
-def cat_today():
-    out_dir = os.path.expanduser('~/.750words/')
-    file_format = "txt"
-    today = datetime.datetime.today()
-    path = os.path.join(out_dir, "%4i-%2i-%2i" % (today.year, today.month, today.day) + '.' + file_format) 
-    if not os.path.exists(path):
-        sys.stdout.write('')
-    else:
-        sys.stdout.write(open(path, 'r').read())
-
-def stats_today():
+def stats(date):
     pass
 
+def wc(date):
+    pass
+
+def isnumber(string):
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+
+def parse_date(date):
+    '''parses a natural language date'''
+    if isnumber(date):
+        date = int(date)
+        return datetime.datetime.today() + (datetime.timedelta(days=1) * date)
+
+    elif isinstance(date, str):
+        if date.lower().strip() == 'today':
+            return datetime.datetime.today()
+        elif date.lower().strip() == 'yesterday':
+            return datetime.datetime.today() - datetime.timedelta(days=1)
+    return datetime.datetime.today()
+
 def main():
-    actions = ('cat', 'edit', 'stats')
+    actions = ('cat', 'edit', 'stats', 'wc')
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', nargs='?', default='edit', choices=actions)
-    parser.add_argument('--editor', help="The editor you wish to use to write your words.", default='vim')
+    parser.add_argument('action', choices=actions, help="the action you wish to perform")
+    parser.add_argument('date', nargs='?', default='today', help="the day on which to perform the action")
+    parser.add_argument('--editor', help="the text editor you wish to use", default='vim')
     args = parser.parse_args()
 
+    date = parse_date(args.date)
+
     if args.action == 'edit':
-        write_today(args.editor)
+        edit(date, args.editor)
     elif args.action == 'cat':
-        cat_today()
+        cat(date)
     elif args.action == 'stats':
-        stats_today()
+        stats(date)
 
 if __name__ == "__main__":
     main()
