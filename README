@@ -1,12 +1,12 @@
-usage: 750words.py [-h] {stats,edit,cat,path,config,wc} ...
+usage: 750words.py [-h] {wc,edit,cat,path,analyze,config} ...
 
 positional arguments:
-  {stats,edit,cat,path,config,wc}
+  {wc,edit,cat,path,analyze,config}
+    analyze             view analysis
     cat                 cat the text
     config              modify or view configuration
     edit                edit the text
     path                get the path to the text file
-    stats               view stats
     wc                  view word count
 
 optional arguments:
