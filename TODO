@@ -1,5 +1,6 @@
 improved text analysis features.
 	use NLTK.
+		see: http://text-processing.com/demo/sentiment/
 stats tracking.
 perhaps use a customized version of vim - vimscript
 	use vim -S 750words.vim <file>
