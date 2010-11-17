@@ -1,3 +1,4 @@
+use NLTK Text class in text analysis module
 improved text analysis features.
 	use NLTK.
 implement statistics commands in pure python
