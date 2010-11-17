@@ -9,6 +9,8 @@ import argparse
 import datetime
 import ConfigParser
 
+import text_analysis
+
 def is_number(string):
    try:
        float(string)
@@ -18,23 +20,19 @@ def is_number(string):
 
 def parse_date(date):
     '''parses a natural language date'''
+    day = datetime.timedelta(days=1)
     if is_number(date):
         date = int(date)
-        return datetime.datetime.today() + (datetime.timedelta(days=1) * date)
+        return datetime.datetime.today() + (day * date)
 
     elif isinstance(date, str):
         if date.lower().strip() == 'today':
             return datetime.datetime.today()
         elif date.lower().strip() == 'yesterday':
-            return datetime.datetime.today() - datetime.timedelta(days=1)
+            return datetime.datetime.today() - day
+        elif date.lower().strip() == 'tomorrow':
+            return datetime.datetime.today() + day
     return datetime.datetime.today()
-
-def word_count(path):
-    try:
-        word_count = int(subprocess.Popen('wc -w < ' + path, shell=True, stdout=subprocess.PIPE).communicate()[0])
-    except:
-        word_count = 0
-    return word_count
 
 class SevenFiftyWords:
     def __init__(self):
@@ -95,7 +93,7 @@ class SevenFiftyWords:
         path = self.get_path(date)
         subprocess.call([editor, path])
         if os.path.exists(path):
-            words = word_count(path)
+            words = text_analysis.word_count(path)
             print 'You have written %i out of 750 words so far.' % words
             if words < 750:
                 return False
@@ -107,22 +105,17 @@ class SevenFiftyWords:
         return self.get_path(args.date)
     
     def stats(self, args):
+        import text_analysis
         date = args.date
-        try:
-            path = self.get_path(date)
-            style = subprocess.Popen(['style', path], stdout=subprocess.PIPE).communicate()[0]
-        except OSError:
-            style = "You must install the 'style' program. Try sudo apt-get install diction."
-        sys.stdout.write(style)
-        return style
-    
+        path = self.get_path(date)
+        analysis = text_analysis.analyze(path)
+        print analysis
+        return analysis
+   
     def wc(self, args):
         date = args.date
-        try:
-            path = self.get_path(date)
-            words = word_count(path)
-        except OSError:
-            words = 0
+        path = self.get_path(date)
+        words = text_analysis.word_count(path)
         print words
         return words
     
