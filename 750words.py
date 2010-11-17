@@ -55,6 +55,13 @@ class SevenFiftyWords:
                 self.configuration.write(cfile)
                 cfile.close()
             self.configuration.read(self.configfile)
+
+    def analyze(self, args):
+        import text_analysis
+        for date in args.date:
+            path = self.get_path(date)
+            analysis = text_analysis.analyze(path)
+            print analysis
     
     def cat(self, args):
         results = ''
@@ -102,14 +109,7 @@ class SevenFiftyWords:
     def path(self, args):
         for date in args.date:
             print self.get_path(date)
-    
-    def stats(self, args):
-        import text_analysis
-        for date in args.date:
-            path = self.get_path(date)
-            analysis = text_analysis.analyze(path)
-            print analysis
-   
+  
     def wc(self, args):
         for date in args.date:
             path = self.get_path(date)
@@ -128,6 +128,11 @@ class SevenFiftyWords:
         # set up argparsers
         parser = argparse.ArgumentParser()
         subparsers = parser.add_subparsers()
+    
+        # analyze parser
+        analyze_parser = subparsers.add_parser('analyze', help='view analysis')
+        analyze_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
+        analyze_parser.set_defaults(func=self.analyze)
     
         # cat parser
         cat_parser = subparsers.add_parser('cat', help='cat the text')
@@ -148,11 +153,6 @@ class SevenFiftyWords:
         path_parser = subparsers.add_parser('path', help='get the path to the text file')
         path_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
         path_parser.set_defaults(func=self.path)
-    
-        # stats parser
-        stats_parser = subparsers.add_parser('stats', help='view stats')
-        stats_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
-        stats_parser.set_defaults(func=self.stats)
     
         # wc parser
         wc_parser = subparsers.add_parser('wc', help='view word count')
