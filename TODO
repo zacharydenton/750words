@@ -1,9 +1,8 @@
 improved text analysis features.
 	use NLTK.
-		see: http://text-processing.com/demo/sentiment/
+implement statistics commands in pure python
 stats tracking.
 perhaps use a customized version of vim - vimscript
 	use vim -S 750words.vim <file>
-implement word count, statistics commands in pure python
 add a GUI
 
