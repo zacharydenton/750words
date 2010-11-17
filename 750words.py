@@ -57,13 +57,16 @@ class SevenFiftyWords:
             self.configuration.read(self.configfile)
     
     def cat(self, args):
-        path = self.get_path(args.date)
-        if not os.path.exists(path):
-            output = ''
-        else:
-            output = open(path, 'r').read()
-        sys.stdout.write(output)
-        return output
+        results = ''
+        for date in args.date:
+            path = self.get_path(date)
+            if not os.path.exists(path):
+                output = ''
+            else:
+                output = open(path, 'r').read()
+            sys.stdout.write(output)
+            results += output
+        return results
     
     def config(self, args):
         if args.editor:
@@ -88,36 +91,30 @@ class SevenFiftyWords:
         Returns the path to today's writing if it contains at least 750 words; False if not.
         """ 
         
-        date = args.date
-        editor = self.configuration.get('Editor', 'command')
-        path = self.get_path(date)
-        subprocess.call([editor, path])
-        if os.path.exists(path):
-            words = text_analysis.word_count(path)
-            print 'You have written %i out of 750 words so far.' % words
-            if words < 750:
-                return False
-            else:
-                return path
+        for date in args.date:
+            editor = self.configuration.get('Editor', 'command')
+            path = self.get_path(date)
+            subprocess.call([editor, path])
+            if os.path.exists(path):
+                words = text_analysis.word_count(path)
+                print 'You have written %i out of 750 words so far.' % words
     
     def path(self, args):
-        print self.get_path(args.date)
-        return self.get_path(args.date)
+        for date in args.date:
+            print self.get_path(date)
     
     def stats(self, args):
         import text_analysis
-        date = args.date
-        path = self.get_path(date)
-        analysis = text_analysis.analyze(path)
-        print analysis
-        return analysis
+        for date in args.date:
+            path = self.get_path(date)
+            analysis = text_analysis.analyze(path)
+            print analysis
    
     def wc(self, args):
-        date = args.date
-        path = self.get_path(date)
-        words = text_analysis.word_count(path)
-        print words
-        return words
+        for date in args.date:
+            path = self.get_path(date)
+            words = text_analysis.word_count(path)
+            print words
     
     def get_path(self, date):
         out_dir = os.path.expanduser(self.directory)
@@ -134,7 +131,7 @@ class SevenFiftyWords:
     
         # cat parser
         cat_parser = subparsers.add_parser('cat', help='cat the text')
-        cat_parser.add_argument('date', help="the date of the text", default=parse_date("today"), type=parse_date, nargs='?')
+        cat_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
         cat_parser.set_defaults(func=self.cat)
     
         # config parser
@@ -144,22 +141,22 @@ class SevenFiftyWords:
     
         # edit parser
         edit_parser = subparsers.add_parser('edit', help='edit the text')
-        edit_parser.add_argument('date', help="the date of the text", default=parse_date("today"), type=parse_date, nargs='?')
+        edit_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
         edit_parser.set_defaults(func=self.edit)
     
         # path parser
         path_parser = subparsers.add_parser('path', help='get the path to the text file')
-        path_parser.add_argument('date', help="the date of the text", default=parse_date("today"), type=parse_date, nargs='?')
+        path_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
         path_parser.set_defaults(func=self.path)
     
         # stats parser
         stats_parser = subparsers.add_parser('stats', help='view stats')
-        stats_parser.add_argument('date', help="the date of the text", default=parse_date("today"), type=parse_date, nargs='?')
+        stats_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
         stats_parser.set_defaults(func=self.stats)
     
         # wc parser
         wc_parser = subparsers.add_parser('wc', help='view word count')
-        wc_parser.add_argument('date', help="the date of the text", default=parse_date("today"), type=parse_date, nargs='?')
+        wc_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
         wc_parser.set_defaults(func=self.wc)
     
         args = parser.parse_args()

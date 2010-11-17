@@ -2,7 +2,6 @@
 # text analysis module
 from collections import defaultdict
 
-import nltk.classify.util
 from nltk.classify import NaiveBayesClassifier
 from nltk.corpus import movie_reviews
 
