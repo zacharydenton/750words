@@ -4,17 +4,20 @@ from collections import defaultdict
 
 from nltk.classify import NaiveBayesClassifier
 from nltk.corpus import movie_reviews
+from nltk.corpus import PlaintextCorpusReader
 
 def word_feats(words):
     return dict([(word, True) for word in words])
 
-def get_words(textfile):
-    try:
-        for line in open(textfile):
-            for word in line.split():
-                yield word
-    except:
-        pass
+def get_corpus(path=None):
+    if path is None:
+        try:
+            from sevenfifty import SevenFiftyWords
+            sevenfiftywords = SevenFiftyWords()
+            path = sevenfiftywords.output_dir
+        except:
+            return
+    return PlaintextCorpusReader(path, '.*')
 
 def word_count(textfile):
     words = 0
@@ -53,6 +56,7 @@ def classify_sentiment(textfile):
     return classifier.classify(words)
 
 def analyze(textfile):
+    corpus = get_corpus()
     analysis = {}
     analysis['word_count'] = word_count(textfile)
     analysis['histogram'] = histogram(textfile)

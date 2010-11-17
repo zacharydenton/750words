@@ -132,7 +132,9 @@ class SevenFiftyWords:
             words = text_analysis.word_count(path)
             print words
     
-    def get_path(self, date):
+    def get_path(self, date=None):
+        if date is None:
+            date = datetime.datetime.today()
         file_format = "txt"
         path = os.path.join(self.output_dir, "%04i-%02i-%02i" % (date.year, date.month, date.day) + '.' + file_format) 
         return path
