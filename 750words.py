@@ -88,8 +88,10 @@ class SevenFiftyWords:
                 self.configuration.write(cfile)
                 cfile.close()
         if args.output:
-            if os.path.exists(os.path.expanduser(args.output)):
-                self.configuration.set('Output', 'directory', os.path.expanduser(args.output))
+            output_dir = os.path.expanduser(args.output)
+            if os.path.exists(output_dir):
+                self.configuration.set('Output', 'directory', output_dir)
+                self.update_path(output_dir)
                 with open(self.configfile, 'wb') as cfile:
                     self.configuration.write(cfile)
                     cfile.close()
@@ -133,6 +135,18 @@ class SevenFiftyWords:
     def get_path(self, date):
         file_format = "txt"
         path = os.path.join(self.output_dir, "%04i-%02i-%02i" % (date.year, date.month, date.day) + '.' + file_format) 
+        return path
+
+    def update_path(self, path):
+        if path == self.output_dir:
+            return
+        files = os.listdir(self.output_dir)
+        for textfile in files:
+            if textfile.endswith('.txt'):
+                original = os.path.join(self.output_dir, textfile)
+                output = os.path.join(path, textfile)
+                shutil.move(original, output)
+        self.output_dir = path
         return path
     
     def main(self):
