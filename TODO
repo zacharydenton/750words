@@ -1,4 +1,5 @@
 improved text analysis features.
+	use NLTK.
 stats tracking.
 perhaps use a customized version of vim - vimscript
 	use vim -S 750words.vim <file>
