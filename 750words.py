@@ -50,11 +50,17 @@ class SevenFiftyWords:
             # set defaults
             self.configuration.add_section('Editor')
             self.configuration.set('Editor', 'command', 'vim')
+            self.configuration.add_section('Output')
+            self.configuration.set('Output', 'directory', os.path.join(self.directory, 'text'))
         finally:
             with open(self.configfile, 'wb') as cfile:
                 self.configuration.write(cfile)
                 cfile.close()
             self.configuration.read(self.configfile)
+            self.output_dir = self.configuration.get('Output', 'directory')
+            if not os.path.exists(self.output_dir):
+                os.mkdir(self.output_dir)
+
 
     def analyze(self, args):
         import text_analysis
@@ -81,6 +87,14 @@ class SevenFiftyWords:
             with open(self.configfile, 'wb') as cfile:
                 self.configuration.write(cfile)
                 cfile.close()
+        if args.output:
+            if os.path.exists(os.path.expanduser(args.output)):
+                self.configuration.set('Output', 'directory', os.path.expanduser(args.output))
+                with open(self.configfile, 'wb') as cfile:
+                    self.configuration.write(cfile)
+                    cfile.close()
+            else:
+                print "The path specified,", args.output + ", does not exist."
 
         for section in self.configuration.sections():
             print section + ":"
@@ -117,11 +131,8 @@ class SevenFiftyWords:
             print words
     
     def get_path(self, date):
-        out_dir = os.path.expanduser(self.directory)
-        if not os.path.exists(out_dir):
-            os.mkdir(os.path.dirname(path))
         file_format = "txt"
-        path = os.path.join(out_dir, "%04i-%02i-%02i" % (date.year, date.month, date.day) + '.' + file_format) 
+        path = os.path.join(self.output_dir, "%04i-%02i-%02i" % (date.year, date.month, date.day) + '.' + file_format) 
         return path
     
     def main(self):
@@ -141,7 +152,8 @@ class SevenFiftyWords:
     
         # config parser
         config_parser = subparsers.add_parser('config', help='modify or view configuration')
-        config_parser.add_argument('--editor', help="the text editor you wish to use")
+        config_parser.add_argument('-e', '--editor', help="the text editor you wish to use")
+        config_parser.add_argument('-o', '--output', help="the directory in which to store your texts")
         config_parser.set_defaults(func=self.config)
     
         # edit parser
