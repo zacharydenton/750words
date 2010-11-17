@@ -61,9 +61,11 @@ class SevenFiftyWords:
     def cat(self, args):
         path = self.get_path(args.date)
         if not os.path.exists(path):
-            sys.stdout.write('')
+            output = ''
         else:
-            sys.stdout.write(open(path, 'r').read())
+            output = open(path, 'r').read()
+        sys.stdout.write(output)
+        return output
     
     def config(self, args):
         if args.editor:
@@ -75,6 +77,8 @@ class SevenFiftyWords:
         for section in self.configuration.sections():
             print section + ":"
             print self.configuration.items(section)
+
+        return [self.configuration.items(section) for section in self.configuration.sections()]
     
     def edit(self, args):
         """Opens up an editor so that you can write the day's words.
@@ -100,6 +104,7 @@ class SevenFiftyWords:
     
     def path(self, args):
         print self.get_path(args.date)
+        return self.get_path(args.date)
     
     def stats(self, args):
         date = args.date
@@ -109,6 +114,7 @@ class SevenFiftyWords:
         except OSError:
             style = "You must install the 'style' program. Try sudo apt-get install diction."
         sys.stdout.write(style)
+        return style
     
     def wc(self, args):
         date = args.date
@@ -118,6 +124,7 @@ class SevenFiftyWords:
         except OSError:
             words = 0
         print words
+        return words
     
     def get_path(self, date):
         out_dir = os.path.expanduser(self.directory)
