@@ -117,7 +117,7 @@ class SevenFiftyWords:
         for date in args.date:
             editor = self.configuration.get('Editor', 'command')
             path = self.get_path(date)
-            subprocess.call([editor, path])
+            subprocess.call(editor + " " + path, shell=True)
             if os.path.exists(path):
                 words = text_analysis.word_count(path)
                 print 'You have written %i out of 750 words so far.' % words
