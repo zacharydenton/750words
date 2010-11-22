@@ -64,10 +64,11 @@ class SevenFiftyWords:
 
     def analyze(self, args):
         import text_analysis
+        from pprint import pprint
         for date in args.date:
             path = self.get_path(date)
             analysis = text_analysis.analyze(path)
-            print analysis
+            pprint(analysis)
     
     def cat(self, args):
         results = ''
