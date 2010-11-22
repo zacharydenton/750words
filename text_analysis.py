@@ -1,20 +1,47 @@
 #!/usr/bin/env python
 # text analysis module
 from collections import defaultdict
+import random
+import re
 import cPickle as pickle
 
 import nltk
+from nltk.corpus import wordnet as wn
 
-def word_feats(words):
-    return dict([(word, True) for word in words])
+def get_similar(word):
+    similar = []
+    synsets = wn.synsets(word)
+    for synset in synsets:
+        similar_tos = synset.similar_tos()
+        for ss in similar_tos:
+            for lemma in ss.lemmas:
+                similar.append(lemma.name)
 
-def get_words(path):
-    words = []
-    for line in open(path):
-        for word in line.split():
-            if word.isalpha():
-                words.append(word.lower())
-    return words
+    return similar
+
+def document_features(document):
+    try:
+        word_features_file = open('.word_features', 'rb')
+        word_features = pickle.load(word_features_file)
+        word_features_file.close()
+    except:
+        all_words = nltk.FreqDist(w.lower() for w in nltk.corpus.movie_reviews.words())
+        word_features = all_words.keys()[:2000]
+        word_features_file = open('.word_features', 'wb')
+        pickle.dump(word_features, word_features_file, -1)
+        word_features_file.close()
+
+    document_words = set(document)
+    features = {}
+    for word in word_features:
+        if word in document_words:
+            features['contains(%s)' % word] = True
+            continue
+        for similar in get_similar(word):
+            if similar in document_words:
+                features['contains(%s)' % word] = True
+
+    return features
 
 def get_corpus(path=None):
     if path is None:
@@ -26,47 +53,21 @@ def get_corpus(path=None):
             return
     return nltk.corpus.PlaintextCorpusReader(path, '.*')
 
-def word_count(textfile):
-    words = 0
-    try:
-        for line in open(textfile):
-            for word in line.split():
-                words += 1
-    except:
-        pass
-    return words
-
-def histogram(textfile):
-    histo = defaultdict(int)
-    for line in open(textfile):
-        for word in line.split():
-            word = word.lower()
-            if word not in nltk.corpus.stopwords.words('english'):
-                histo[word] += 1
-    return histo
-
-def classify_sentiment(textfile):
-    words = word_feats(get_words(textfile))
+def classify_sentiment(tokens):
+    words = document_features(tokens)
     try:
         sentiment_file = open('.sentiment_classifier', 'rb')
         classifier = pickle.load(sentiment_file)
         sentiment_file.close()
     except:
         print "generating sentiment classifier..."
-
-        negids = nltk.corpus.movie_reviews.fileids('neg')
-        posids = nltk.corpus.movie_reviews.fileids('pos')
-     
-        negfeats = [(word_feats(nltk.corpus.movie_reviews.words(fileids=[f])), 'neg') for f in negids]
-        posfeats = [(word_feats(nltk.corpus.movie_reviews.words(fileids=[f])), 'pos') for f in posids]
-     
-        negcutoff = len(negfeats)*3/4
-        poscutoff = len(posfeats)*3/4
-     
-        trainfeats = negfeats[:negcutoff] + posfeats[:poscutoff]
-        testfeats = negfeats[negcutoff:] + posfeats[poscutoff:]
-     
-        classifier = nltk.NaiveBayesClassifier.train(trainfeats)
+        documents = [(list(nltk.corpus.movie_reviews.words(fileid)), category)
+                 for category in nltk.corpus.movie_reviews.categories()
+                 for fileid in nltk.corpus.movie_reviews.fileids(category)]
+        random.shuffle(documents)
+       
+        featuresets = [(document_features(d), c) for (d,c) in documents]
+        classifier = nltk.NaiveBayesClassifier.train(featuresets)
 
         sentiment_file = open('.sentiment_classifier', 'wb')
         # use the more efficient binary format
@@ -75,8 +76,7 @@ def classify_sentiment(textfile):
 
     return classifier.classify(words)
 
-def tag_pos(textfile):
-    words = get_words(textfile)
+def tag_pos(tokens):
     try:
         tagger_file = open('.pos_tagger', 'rb')
         tagger = pickle.load(tagger_file)
@@ -99,18 +99,39 @@ def tag_pos(textfile):
         pickle.dump(tagger, tagger_file, -1)
         tagger_file.close()
 
-    return tagger.tag(words)
+    for sentence in tokens:
+        yield tagger.tag(sentence)
 
-def analyze(textfile):
-    corpus = get_corpus()
+def analyze(document):
+    textfile = open(document)
+    # normalize whitespace
+    raw = ' '.join(line.strip() for line in textfile)
+    tokens = nltk.wordpunct_tokenize(raw)
+    sentences = [nltk.word_tokenize(sentence) for sentence in nltk.sent_tokenize(raw)]
+    words = []
+    for token in tokens:
+        if token.isalpha():
+            words.append(token.lower())
+
+    important_words = [word for word in words if word not in nltk.corpus.stopwords.words('english')]
     analysis = {}
-    analysis['word_count'] = word_count(textfile)
-    analysis['histogram'] = histogram(textfile)
-    analysis['sentiment'] = classify_sentiment(textfile)
-    analysis['pos'] = tag_pos(textfile)
+
+    word_count = len(words)
+    vocab = sorted(set(words))
+
+    fdist = nltk.FreqDist(important_words)
+
+    lexical_diversity = float(word_count) / len(vocab)
+
+    sentence_count = len(sentences)
+
+    analysis['word_count'] = word_count
+    analysis['sentence_count'] = sentence_count
+    analysis['vocab'] = fdist
+    analysis['sentiment'] = classify_sentiment(words)
+    analysis['parts-of-speech'] = list(tag_pos(sentences))
     return analysis
 
 if __name__ == "__main__":
     import sys
-    for textfile in sys.argv[1:]:
-        print analyze(textfile)
+    print get_similar(sys.argv[1])
