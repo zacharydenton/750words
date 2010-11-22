@@ -1,5 +1,5 @@
 " word wrap options
-"set tw=72 fo=cqt wm=0
+set tw=72 fo=cqt wm=0
 
 "-------------- word count ---------------
 " from http://stackoverflow.com/questions/114431/fast-word-count-function-in-vim/120386#120386
