@@ -1,8 +1,5 @@
 use NLTK CorpusReader class in text analysis module
-improve text analysis features.
-	use NLTK.
-OBS! sentiment classifier doesn't seem to work...
-implement statistics commands in pure python
+	i.e. make a Document class or something.
 stats tracking.
 perhaps use a customized version of vim - vimscript
 	use vim -S 750words.vim <file>
