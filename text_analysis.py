@@ -67,7 +67,8 @@ def classify_sentiment(textfile):
         classifier = NaiveBayesClassifier.train(trainfeats)
 
         sentiment_file = open('.sentiment_classifier', 'wb')
-        pickle.dump(classifier, sentiment_file)
+        # use the more efficient binary format
+        pickle.dump(classifier, sentiment_file, 1)
     finally:
         return classifier.classify(words)
 
