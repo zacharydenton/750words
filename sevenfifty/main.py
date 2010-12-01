@@ -9,7 +9,7 @@ import argparse
 import datetime
 import ConfigParser
 
-import text_analysis
+import analysis
 
 def is_number(string):
    try:
@@ -63,11 +63,10 @@ class SevenFiftyWords:
 
 
     def analyze(self, args):
-        import text_analysis
         from pprint import pprint
         for date in args.date:
             path = self.get_path(date)
-            analysis = text_analysis.analyze(path)
+            analysis = sevenfifty.analysis.analyze(path)
             pprint(analysis)
     
     def cat(self, args):
@@ -120,7 +119,7 @@ class SevenFiftyWords:
             path = self.get_path(date)
             subprocess.call(editor + " " + path, shell=True)
             if os.path.exists(path):
-                words = text_analysis.word_count(path)
+                words = sevenfifty.analysis.word_count(path)
                 print 'You have written %i out of 750 words so far.' % words
     
     def path(self, args):
@@ -130,7 +129,7 @@ class SevenFiftyWords:
     def wc(self, args):
         for date in args.date:
             path = self.get_path(date)
-            words = text_analysis.word_count(path)
+            words = sevenfifty.analysis.word_count(path)
             print words
     
     def get_path(self, date=None):
