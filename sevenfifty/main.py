@@ -66,8 +66,7 @@ class SevenFiftyWords:
         from pprint import pprint
         for date in args.date:
             path = self.get_path(date)
-            analysis = sevenfifty.analysis.analyze(path)
-            pprint(analysis)
+            pprint(analysis.analyze(path))
     
     def cat(self, args):
         results = ''
@@ -119,7 +118,7 @@ class SevenFiftyWords:
             path = self.get_path(date)
             subprocess.call(editor + " " + path, shell=True)
             if os.path.exists(path):
-                words = sevenfifty.analysis.word_count(path)
+                words = analysis.word_count(path)
                 print 'You have written %i out of 750 words so far.' % words
     
     def path(self, args):
@@ -129,7 +128,7 @@ class SevenFiftyWords:
     def wc(self, args):
         for date in args.date:
             path = self.get_path(date)
-            words = sevenfifty.analysis.word_count(path)
+            words = analysis.word_count(path)
             print words
     
     def get_path(self, date=None):

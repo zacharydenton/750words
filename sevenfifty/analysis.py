@@ -3,6 +3,7 @@
 from collections import defaultdict
 import random
 import re
+import subprocess
 import cPickle as pickle
 
 import nltk
@@ -102,16 +103,22 @@ def tag_pos(tokens):
     for sentence in tokens:
         yield tagger.tag(sentence)
 
+def word_count(document):
+    """returns the number of words in document"""
+    textfile = open(document)
+    # normalize whitespace
+    raw = ' '.join(line.strip() for line in textfile)
+    tokens = nltk.wordpunct_tokenize(raw)
+    words = [token.lower() for token in tokens if token.isalpha()]
+    return len(words)
+
 def analyze(document):
     textfile = open(document)
     # normalize whitespace
     raw = ' '.join(line.strip() for line in textfile)
     tokens = nltk.wordpunct_tokenize(raw)
     sentences = [nltk.word_tokenize(sentence) for sentence in nltk.sent_tokenize(raw)]
-    words = []
-    for token in tokens:
-        if token.isalpha():
-            words.append(token.lower())
+    words = [token.lower() for token in tokens if token.isalpha()]
 
     important_words = [word for word in words if word not in nltk.corpus.stopwords.words('english')]
     analysis = {}
