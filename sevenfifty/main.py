@@ -186,9 +186,12 @@ class SevenFiftyWords:
         wc_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
         wc_parser.set_defaults(func=self.wc)
     
-        args = parser.parse_args()
-    
-        # call the specified function
+        if len(sys.argv) == 1:
+            # default when no command is specified
+            args = parser.parse_args(['edit'])
+        else:
+            # call the specified function
+            args = parser.parse_args()
         args.func(args)
     
 if __name__ == "__main__":
