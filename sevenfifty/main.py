@@ -57,10 +57,10 @@ def git_init(path):
     if not os.path.isdir(os.path.join(path, ".git")):
         return subprocess.Popen(['git', 'init', path], stdout=subprocess.PIPE).communicate()[0]
 
-def git_commit(filename):
+def git_commit(filename, message='edit'):
     os.chdir(os.path.dirname(filename))
     subprocess.call(['git', 'add', os.path.basename(filename)])
-    return subprocess.Popen(['git', 'commit', '-m', 'edit'], stdout=subprocess.PIPE).communicate()[0]
+    return subprocess.Popen(['git', 'commit', '-m', message], stdout=subprocess.PIPE).communicate()[0]
 
 def git_log(path):
     os.chdir(path)
@@ -148,15 +148,19 @@ class SevenFiftyWords:
         for date in args.date:
             editor = self.configuration.get('Editor', 'command')
             path = self.get_path(date)
+            old_wordcount = analysis.word_count(path)
             subprocess.call([editor, path])
+            wordcount = analysis.word_count(path)
+            difference = wordcount - old_wordcount
             if GIT_INSTALLED:
-                git_commit(path)
-            if os.path.exists(path):
-                words = analysis.word_count(path)
-                if words < 750:
-                    print 'You have written %i out of 750 words so far.' % words
-                else:
-                    print 'You wrote %i words today. Great job!' % words
+                message = 'added %i words to %s for a total of %i' % \
+                        (difference, os.path.basename(path), wordcount)
+                git_commit(path, message)
+
+            if wordcount < 750:
+                print 'You have written %i out of 750 words so far.' % wordcount
+            else:
+                print 'You wrote %i words today. Great job!' % wordcount
     
     def log(self, args):
         git_log(self.output_dir)
@@ -168,8 +172,8 @@ class SevenFiftyWords:
     def wc(self, args):
         for date in args.date:
             path = self.get_path(date)
-            words = analysis.word_count(path)
-            print words
+            wordcount = analysis.word_count(path)
+            print wordcount
     
     def get_path(self, date=None):
         if date is None:

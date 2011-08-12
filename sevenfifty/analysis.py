@@ -105,12 +105,15 @@ def tag_pos(tokens):
 
 def word_count(document):
     """returns the number of words in document"""
-    textfile = open(document)
-    # normalize whitespace
-    raw = ' '.join(line.strip() for line in textfile)
-    tokens = nltk.wordpunct_tokenize(raw)
-    words = [token.lower() for token in tokens if token.isalpha()]
-    return len(words)
+    try:
+        textfile = open(document)
+        # normalize whitespace
+        raw = ' '.join(line.strip() for line in textfile)
+        tokens = nltk.wordpunct_tokenize(raw)
+        words = [token.lower() for token in tokens if token.isalpha()]
+        return len(words)
+    except IOError:
+        return 0
 
 def analyze(document):
     textfile = open(document)
