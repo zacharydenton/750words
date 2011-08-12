@@ -153,7 +153,10 @@ class SevenFiftyWords:
                 git_commit(path)
             if os.path.exists(path):
                 words = analysis.word_count(path)
-                print 'You have written %i out of 750 words so far.' % words
+                if words < 750:
+                    print 'You have written %i out of 750 words so far.' % words
+                else:
+                    print 'You wrote %i words today. Great job!' % words
     
     def log(self, args):
         git_log(self.output_dir)
