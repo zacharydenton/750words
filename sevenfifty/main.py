@@ -11,6 +11,23 @@ import ConfigParser
 
 import analysis
 
+def which(program):
+    import os
+    def is_exe(fpath):
+        return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
 def is_number(string):
    try:
        float(string)
@@ -33,6 +50,21 @@ def parse_date(date):
         elif date.lower().strip() == 'tomorrow':
             return datetime.datetime.today() + day
     return datetime.datetime.today()
+
+GIT_INSTALLED = which('git')
+
+def git_init(path):
+    if not os.path.isdir(os.path.join(path, ".git")):
+        return subprocess.Popen(['git', 'init', path], stdout=subprocess.PIPE).communicate()[0]
+
+def git_commit(filename):
+    os.chdir(os.path.dirname(filename))
+    subprocess.call(['git', 'add', os.path.basename(filename)])
+    return subprocess.Popen(['git', 'commit', '-m', 'edit'], stdout=subprocess.PIPE).communicate()[0]
+
+def git_log(path):
+    os.chdir(path)
+    subprocess.call(['git', 'log'])
 
 class SevenFiftyWords:
     def __init__(self):
@@ -116,11 +148,16 @@ class SevenFiftyWords:
         for date in args.date:
             editor = self.configuration.get('Editor', 'command')
             path = self.get_path(date)
-            subprocess.call(editor + " " + path, shell=True)
+            subprocess.call([editor, path])
+            if GIT_INSTALLED:
+                git_commit(path)
             if os.path.exists(path):
                 words = analysis.word_count(path)
                 print 'You have written %i out of 750 words so far.' % words
     
+    def log(self, args):
+        git_log(self.output_dir)
+
     def path(self, args):
         for date in args.date:
             print self.get_path(date)
@@ -148,6 +185,8 @@ class SevenFiftyWords:
                 output = os.path.join(path, textfile)
                 shutil.move(original, output)
         self.output_dir = path
+        if GIT_INSTALLED:
+            git_init(self.output_dir)
         return path
     
     def main(self):
@@ -176,6 +215,11 @@ class SevenFiftyWords:
         edit_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
         edit_parser.set_defaults(func=self.edit)
     
+        # log parser
+        if GIT_INSTALLED:
+            log_parser = subparsers.add_parser('log', help='print the git log')
+            log_parser.set_defaults(func=self.log)
+
         # path parser
         path_parser = subparsers.add_parser('path', help='get the path to the text file')
         path_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
