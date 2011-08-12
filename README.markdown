@@ -16,7 +16,7 @@ If you want version control with Git, you're going to want to install that as we
 
 Configuration
 -------------
-There's only two things that need to be configured: which editor to use, and where to store your words.
+There are only two things to configure: which editor to use, and where to store your words.
 
 To set the editor:
 
@@ -48,3 +48,13 @@ Here's the full output of `750words -h`:
 	  -h, --help            show this help message and exit
 
 Have fun!
+
+Examples
+--------
+To see how much you wrote in August 2011:
+
+    750words wc $(dirname $(750words path))/2011-08-*.txt
+
+This is using 750words' built-in word count analyzer, which counts contractions like "don't" as two words. This is slower than just searching by spaces, so, alternatively:
+
+    wc -w $(dirname $(750words path))/2011-08-*.txt

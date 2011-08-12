@@ -136,14 +136,7 @@ class SevenFiftyWords:
         return [self.configuration.items(section) for section in self.configuration.sections()]
     
     def edit(self, args):
-        """Opens up an editor so that you can write the day's words.
-        
-        Keyword arguments:
-          editor: Name of the editor to use. Should be executable from the user's
-                  working directory.
-    
-        Returns the path to today's writing if it contains at least 750 words; False if not.
-        """ 
+        """Opens up an editor so that you can write the day's words.""" 
         
         for date in args.date:
             editor = self.configuration.get('Editor', 'command')
@@ -170,10 +163,15 @@ class SevenFiftyWords:
             print self.get_path(date)
   
     def wc(self, args):
-        for date in args.date:
-            path = self.get_path(date)
-            wordcount = analysis.word_count(path)
-            print wordcount
+        counts = [(analysis.word_count(path), path) for path in args.paths]
+        if len(counts) == 1:
+            print counts[0][0], counts[0][1]
+        else:
+            total = sum(wordcount for wordcount, filename in counts)
+            width = len(str(total))
+            for wordcount, filename in counts:
+                print str(wordcount).rjust(width), filename
+            print total, 'total'
     
     def get_path(self, date=None):
         if date is None:
@@ -234,7 +232,7 @@ class SevenFiftyWords:
     
         # wc parser
         wc_parser = subparsers.add_parser('wc', help='view word count')
-        wc_parser.add_argument('date', help="the date of the text", default=[parse_date("today")], type=parse_date, nargs='*')
+        wc_parser.add_argument('paths', help="the file(s) that you wanted counted", nargs='*')
         wc_parser.set_defaults(func=self.wc)
     
         if len(sys.argv) == 1:
