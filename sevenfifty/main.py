@@ -81,7 +81,7 @@ class SevenFiftyWords:
         except:
             # set defaults
             self.configuration.add_section('Editor')
-            self.configuration.set('Editor', 'command', 'vim')
+            self.configuration.set('Editor', 'command', 'editor')
             self.configuration.add_section('Output')
             self.configuration.set('Output', 'directory', os.path.join(self.directory, 'text'))
         finally:

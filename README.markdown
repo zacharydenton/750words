@@ -18,11 +18,19 @@ Configuration
 -------------
 There's only two things that need to be configured: which editor to use, and where to store your words.
 
+To set the editor:
+
+    750words config -e vim
+
+To set the output directory:
+
+    750words config -o ~/Dropbox/docs/journal/
+
 Usage
 -----
-Every day, type `750words` and type at least 750 words. You'll experience major improvements in creativity and perhaps a reduction in stress, as well.
+Every day, type `750words` and type at least 750 words. You'll experience major improvements in creativity and a clear mind. 
 
-There are some other things you can do as well:
+Here's the full output of `750words -h`:
 
 	usage: 750words [-h] {wc,log,edit,cat,path,analyze,config} ...
 
