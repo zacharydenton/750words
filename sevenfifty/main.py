@@ -163,6 +163,8 @@ class SevenFiftyWords:
             print self.get_path(date)
   
     def wc(self, args):
+        if not args.paths:
+            args.paths = [self.get_path()]
         counts = [(analysis.word_count(path), path) for path in args.paths]
         if len(counts) == 1:
             print counts[0][0], counts[0][1]
