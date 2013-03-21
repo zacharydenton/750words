@@ -1,9 +1,143 @@
 #!/usr/bin/env python
+# 750words on the command line.
+import os
+import sys
+import subprocess
+import tempfile
+import shutil
+import argparse
+import datetime
+try:
+    import ConfigParser
+except:
+    # python 3
+    import configparser as ConfigParser
+
+def is_executable(program):
+    try:
+        subprocess.check_call(program, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return True
+    except:
+        return False
+
+GIT_INSTALLED = is_executable(['git', '--version'])
+
+def is_number(string):
+   try:
+       float(string)
+       return True
+   except ValueError:
+       return False
+
+def git_init(path):
+    if not os.path.isdir(os.path.join(path, ".git")):
+        return subprocess.Popen(['git', 'init', path], stdout=subprocess.PIPE).communicate()[0]
+
+def git_commit(filename, message='edit'):
+    os.chdir(os.path.dirname(filename))
+    subprocess.call(['git', 'add', os.path.basename(filename)])
+    return subprocess.Popen(['git', 'commit', '-m', message], stdout=subprocess.PIPE).communicate()[0]
+
+def parse_config(config_path):
+    config = ConfigParser.SafeConfigParser()
+
+    if os.path.isfile(config_path):
+        config.read(config_path)
+    else:
+        config_dir = os.path.dirname(config_path)
+        if not os.path.isdir(config_dir):
+            os.makedirs(config_dir)
+
+        config.add_section('750words')
+        config.set('750words', 'editor', 'editor')
+
+        config.set('750words', 'extension', '.txt')
+
+        directory = os.path.expanduser('~/.750words')
+        config.set('750words', 'directory', directory)
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+        with open(config_path, 'w') as f:
+            config.write(f)
+
+    return config
+
+def word_count(path):
+    try:
+        with open(path) as f:
+            return len(f.read().split())
+    except FileNotFoundError:
+        return 0
+
+def edit(path, editor):
+    old_wordcount = word_count(path)
+
+    try:
+        subprocess.call([editor, path])
+    except OSError:
+        print("%s: command not found. change your editor in the config." % editor)
+        sys.exit(2)
+
+    wordcount = word_count(path)
+    difference = wordcount - old_wordcount
+    if GIT_INSTALLED:
+        message = 'added %i words to %s for a total of %i' % \
+                (difference, os.path.basename(path), wordcount)
+        git_commit(path, message)
+
+    if wordcount < 750:
+        print('You have written %i out of 750 words so far.' % wordcount)
+    else:
+        print('You wrote %i words today. Great job!' % wordcount)
+
+def parse_date(number_or_string):
+    '''parses a natural language date'''
+    if not number_or_string:
+        return datetime.datetime.today()
+
+    one_day = datetime.timedelta(days=1)
+    if is_number(number_or_string):
+        number_or_string = int(number_or_string)
+        return datetime.datetime.today() + (one_day * number_or_string)
+
+    elif isinstance(number_or_string, str):
+        if number_or_string.lower().strip() == 'today':
+            return datetime.datetime.today()
+        elif number_or_string.lower().strip() == 'yesterday':
+            return datetime.datetime.today() - one_day
+        elif number_or_string.lower().strip() == 'tomorrow':
+            return datetime.datetime.today() + one_day
+
+    return datetime.datetime.today()
+
+def get_path(output_dir, extension, date=None):
+    if not date:
+        date = datetime.datetime.today()
+    path = os.path.join(output_dir, "%04i-%02i-%02i" % (date.year, date.month, date.day) + extension) 
+    return path
 
 def main():
-    import sevenfifty
-    sevenfiftywords = sevenfifty.main.SevenFiftyWords()
-    sevenfiftywords.main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('dates', help="the date of the text", default=[None], nargs='*')
+    parser.add_argument('-p', '--path', action='store_true', help="print out path for use with external scripts")
+    parser.add_argument('--config', help='the location of the configuration file', \
+            default=os.path.expanduser('~/.750words/config'))
 
-if __name__ == "__main__":
-    main()
+    args = parser.parse_args()
+    config = parse_config(args.config)
+
+    if GIT_INSTALLED:
+        directory = config.get('750words', 'directory')
+        if not os.path.isdir(os.path.join(directory, '.git')):
+            git_init(directory)
+
+    for date in args.dates:
+        path = get_path(config.get('750words', 'directory'), 
+                config.get('750words', 'extension'), parse_date(date))
+        if args.path:
+            print(path)
+        else:
+            edit(path, config.get('750words', 'editor'))
+    
+if __name__ == "__main__": main()
