@@ -67,7 +67,7 @@ def word_count(path):
     try:
         with open(path) as f:
             return len(f.read().split())
-    except FileNotFoundError:
+    except IOError:
         return 0
 
 def edit(path, editor):
