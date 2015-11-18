@@ -34,8 +34,15 @@ def is_number(string):
         return False
 
 
+def is_git_repo(path):
+    directory = os.path.dirname(path)
+    args = ['git', 'rev-parse']
+    with open(os.devnull, 'w') as f:
+        return subprocess.Popen(args, stderr=f, cwd=directory).wait() == 0
+
+
 def git_init(path):
-    if not os.path.isdir(os.path.join(path, ".git")):
+    if not is_git_repo(path):
         args = ['git', 'init', path]
         process = subprocess.Popen(args, stdout=subprocess.PIPE)
         return process.communicate()[0]
@@ -64,7 +71,7 @@ def parse_config(config_path):
 
         config.set('750words', 'extension', '.txt')
 
-        directory = os.path.expanduser('~/.750words')
+        directory = os.path.expanduser('~/.750words/')
         config.set('750words', 'directory', directory)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -149,7 +156,7 @@ def main():
 
     if GIT_INSTALLED:
         directory = config.get('750words', 'directory')
-        if not os.path.isdir(os.path.join(directory, '.git')):
+        if not is_git_repo(directory):
             git_init(directory)
 
     for date in args.dates:
