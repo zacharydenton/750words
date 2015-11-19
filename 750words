@@ -102,7 +102,7 @@ def edit(path, editor):
     wordcount = word_count(path)
     difference = wordcount - old_wordcount
     if GIT_INSTALLED:
-        message = 'added %i words to %s for a total of %i' % \
+        message = 'Add %i words to %s for a total of %i.' % \
             (difference, os.path.basename(path), wordcount)
         git_commit(path, message)
 
