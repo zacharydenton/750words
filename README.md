@@ -30,7 +30,7 @@ Configuration
 
 There are three things to configure: which editor to use, where to store
 your words, and what file extension to use. Edit the configuration file
-`~/.750words/config` to suit your needs:
+`~/.config/750words` to suit your needs:
 
     [750words]
     editor = vim
