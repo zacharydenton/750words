@@ -56,6 +56,16 @@ def git_commit(filename, message='edit'):
     return process.communicate()[0]
 
 
+def default_config_file():
+    path = os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
+    return path + '/750words/config'
+
+
+def default_data_directory():
+    path = os.getenv('XDG_DATA_HOME', os.path.expanduser('~/.local/share'))
+    return path + '/750words'
+
+
 def parse_config(config_path):
     config = ConfigParser.SafeConfigParser()
 
@@ -67,11 +77,11 @@ def parse_config(config_path):
             os.makedirs(config_dir)
 
         config.add_section('750words')
-        config.set('750words', 'editor', 'editor')
+        config.set('750words', 'editor', os.getenv('EDITOR'))
 
         config.set('750words', 'extension', '.txt')
 
-        directory = os.path.expanduser('~/.750words/')
+        directory = os.path.expanduser(default_data_directory())
         config.set('750words', 'directory', directory)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -149,7 +159,8 @@ def main():
                         help="print out path for use with external scripts")
     parser.add_argument('--config',
                         help='the location of the configuration file',
-                        default=os.path.expanduser('~/.750words/config'))
+                        default=default_config_file())
+
 
     args = parser.parse_args()
     config = parse_config(args.config)
